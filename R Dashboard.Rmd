@@ -1,0 +1,137 @@
+---
+title: "COVID CASES STUDY"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Line Chart Of New Cases
+
+```{r}
+#Chart A - New Cases Line Chart
+library(readxl)
+COVID_data <- read_excel("C:/Local volume/Programming/R-Programming/Dashboard/Covid.xlsx")
+
+library(ggplot2)
+library(dplyr)
+library(scales)  
+
+# Create a column to show month and year
+
+COVID_data$month <- as.Date(cut(COVID_data$Date, breaks = 'month'))
+
+# Filter data by UK only
+
+COVID_dataUK <- COVID_data %>% filter(Location == "United Kingdom")
+
+# Group data by month and year with summing of new cases
+
+COVID_dataUKgrouped <- COVID_dataUK %>% 
+  group_by ( month ) %>% 
+  summarize( sum ( NewCases ) ) %>% 
+  select( month, "NewCases" = "sum(NewCases)" )
+
+# Line Graph result with grouping month and year with summing of new cases
+
+COVID_dataUKgrouped %>%
+  ggplot ( aes( x = month,  y = NewCases, label = NewCases)) +
+  geom_line(color = "blue", size = 2) +
+  scale_y_continuous(labels = comma, breaks = seq(0, 1500000, 100000)) +
+  scale_x_date(date_labels = "%b-%y" , breaks = "1 month") + 
+  theme(axis.text.x = element_text ( size = 10, angle = 90)) +  
+  labs(x = "Month", y = "New Cases") +
+  geom_point(color = "blue", size = 3) +
+  geom_text( aes (label = NewCases), vjust = -0.5, hjust = 0, nudge_x = -0.2)
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Bar Chart of New Cases
+
+```{r}
+library(readxl)
+COVID_data <- read_excel("C:/Local volume/Programming/R-Programming/Dashboard/Covid.xlsx")
+
+library(dplyr)
+library(scales)  
+library(ggplot2)
+
+# Create a column to show month and year
+
+COVID_data$month <-
+  as.Date(cut(COVID_data$Date, breaks = 'month'))
+
+# Filter data by UK only
+
+COVID_data %>%
+  filter(Location == "United Kingdom") %>%
+  
+  # Bar plot - Sum of Cases in the UK by Month & Year with x & y axis formatting
+  
+  ggplot ( aes( x = month,  y = NewCases)) +
+  geom_col(fill = "darkblue") +
+  scale_y_continuous(labels = comma, breaks = seq(0, 1800000, 100000)) +
+  scale_x_date(date_labels = "%b-%y" , breaks = "1 month") +
+  theme(axis.text.x = element_text ( size = 10, angle = 90)) +
+  labs(x = "Date", y = "New Cases")
+```
+
+### Percentage of Total Cases by Month
+
+```{r}
+library(readxl)
+library(dplyr)
+
+# Check if plotly is installed, if not install it
+if (!requireNamespace("plotly", quietly = TRUE)) {
+  install.packages("plotly")
+}
+
+# Load the plotly library
+library(plotly)
+
+# Load the dataset
+COVID_data <- read_excel("C:/Local volume/Programming/R-Programming/Dashboard/Covid.xlsx")
+
+# Create a column to show month and year
+COVID_data$month <- as.Date(cut(COVID_data$Date, breaks = 'month'))
+
+# Filter data by UK only
+COVID_data_UK <- COVID_data %>%
+  filter(Location == "United Kingdom") %>%
+  group_by(month) %>%
+  summarize(TotalCases = sum(NewCases))
+
+# Calculate percentage of total cases for each month
+COVID_data_UK$percentage <- (COVID_data_UK$TotalCases / sum(COVID_data_UK$TotalCases)) * 100
+
+# Create 3D pie chart using plotly
+pie_chart <- plot_ly(COVID_data_UK, labels = ~month, values = ~TotalCases, type = 'pie', 
+                     textinfo = 'percent+label', 
+                     hoverinfo = 'text',
+                     marker = list(colors = rainbow(length(COVID_data_UK$month))),
+                     opacity = 0.8)
+# Customize the layout
+layout(pie_chart, title = "Percentage of Total Cases by Month (UK)",
+       scene = list(
+         aspectratio = list(x = 1, y = 1, z = 0.7),
+         camera = list(
+           eye = list(x = 1.25, y = 1.25, z = 1.25)
+         )
+       ))
+
+# Print pie chart
+pie_chart
+
+```
+

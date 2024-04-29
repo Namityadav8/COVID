@@ -1,27 +1,16 @@
-# Load the dataset
-ipl_data <- read.csv("data.csv", stringsAsFactors = FALSE)
+install.packages("flexdashboard")
+install.packages("readxl")
+install.packages("tidyverse")
+library(plotly)
+install.packages("plotly")
 
-# View the structure of the dataset
-str(ipl_data)
 
-# Summary statistics
-summary(ipl_data)
+# Chart A - New Cases Line Chart
 
-# View the first few rows of the dataset
-head(ipl_data)
 
-# Check for missing values
-any(is.na(ipl_data))
+library(readxl)
+COVID_data <- read_excel("C:\\Users\\Namit Yadav\\Documents\K22GB_18.xlsx")
 
-# Example: Plotting runs scored by each team over the years
 library(ggplot2)
-ggplot(ipl_data, aes(x = season, y = win_by_runs, color = winner)) +
-  geom_point() +
-  labs(title = "Winning Margin of IPL Teams Over the Seasons", x = "Season", y = "Winning Margin") +
-  theme_minimal()
-
-# Example: Calculate average winning margin by each team
-average_winning_margin <- aggregate(win_by_runs ~ winner, data = ipl_data, FUN = mean)
-
-# Display average winning margin
-print(average_winning_margin)
+library(dplyr)
+library(scales)  
